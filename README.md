@@ -32,13 +32,16 @@ pip install -e .
 
 PyTorch and torchvision are not listed in `requirements.txt` because the right build depends on your CUDA version. Install them with the command from [pytorch.org](https://pytorch.org/get-started/locally/) (developed with PyTorch 2.14 + CUDA 13.2).
 
-Download the competition data from Kaggle into `../data/raw` (see `configs/paths.yaml`). The dataset is not redistributed in this repository.
+Download the competition data from Kaggle into `../data/raw` (see `configs/paths.yaml`). The dataset is not redistributed in this repository. Then build the image cache and label tables (~31 GB in `../data/processed`):
+
+```bash
+python scripts/prepare_data.py
+```
 
 ## Roadmap
 
 - [x] Exploratory data analysis
-- [ ] DICOM → PNG preprocessing
-- [ ] Patient-level stratified splits
+- [x] Data preparation: NPY image cache, label tables, patient-level stratified folds
 - [ ] Classification baseline
 - [ ] Detection model
 - [ ] Evaluation and error analysis
