@@ -11,7 +11,7 @@ from concurrent.futures import ProcessPoolExecutor
 import pandas as pd
 from tqdm import tqdm
 
-from rsna.data.prepare import add_folds, build_boxes, build_patients, dicom_to_npy
+from rsna.data.prepare import add_folds, add_stage1_test_flag, build_boxes, build_patients, dicom_to_npy
 from rsna.paths import load_paths
 
 
@@ -40,6 +40,12 @@ def main():
     classes = pd.read_csv(raw_dir / "stage_2_detailed_class_info.csv")
     patients = add_folds(build_patients(labels, classes, train_meta))
     boxes = build_boxes(labels)
+
+    stage1_file = paths["external_data_dir"] / "stage1" / "stage_1_sample_submission.csv"
+    if stage1_file.exists():
+        patients = add_stage1_test_flag(patients, stage1_file)
+    else:
+        print(f"warning: {stage1_file} not found, is_stage1_test column is not added (see README)")
 
     patients.to_csv(out_dir / "patients.csv", index=False)
     boxes.to_csv(out_dir / "boxes.csv", index=False)

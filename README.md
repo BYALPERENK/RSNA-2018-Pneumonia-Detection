@@ -32,11 +32,17 @@ pip install -e .
 
 PyTorch and torchvision are not listed in `requirements.txt` because the right build depends on your CUDA version. Install them with the command from [pytorch.org](https://pytorch.org/get-started/locally/) (developed with PyTorch 2.14 + CUDA 13.2).
 
-Download the competition data from Kaggle into `../data/raw` (see `configs/paths.yaml`). The dataset is not redistributed in this repository. Then build the image cache and label tables (~31 GB in `../data/processed`):
+Download the competition data from Kaggle into `../data/raw` (see `configs/paths.yaml`). The dataset is not redistributed in this repository. Optionally, to mark the 1,000 stage-1 test images (read by three radiologists) inside the training set, put `stage_1_sample_submission.csv` from [pmcheng/rsna-pneumonia](https://github.com/pmcheng/rsna-pneumonia/tree/master/data) into `../data/external/stage1/`.
+
+Then build the image cache and label tables (~31 GB in `../data/processed`):
 
 ```bash
 python scripts/prepare_data.py
 ```
+
+## Notes
+
+- **The test set is labelled differently from most of the training set.** Most training images were read by one radiologist, while the test images were read by three, and the final boxes are roughly where their boxes overlap. Test boxes are therefore smaller, and the top teams shrank their predicted boxes. The 1,000 stage-1 test images, which are now part of the training set, are labelled like the test set; we mark them and use them to tune box shrinking and thresholds. Details and evidence: [02_data_preparation](notebooks/02_data_preparation.ipynb), section 5.
 
 ## Roadmap
 

@@ -61,3 +61,10 @@ def add_folds(patients: pd.DataFrame, n_folds: int = 5, seed: int = 42) -> pd.Da
     for fold, (_, val_idx) in enumerate(StratifiedKFold(n_folds, shuffle=True, random_state=seed).split(patients, strata)):
         patients.loc[val_idx, "fold"] = fold
     return patients
+
+
+def add_stage1_test_flag(patients: pd.DataFrame, stage1_sample_submission: Path) -> pd.DataFrame:
+    """Mark the 1,000 stage-1 test images (three readers each) that stage 2 moved into the training set."""
+    ids = set(pd.read_csv(stage1_sample_submission)["patientId"])
+    assert len(ids) == 1000 and ids <= set(patients["patient_id"]), "unexpected stage-1 test id list"
+    return patients.assign(is_stage1_test=patients["patient_id"].isin(ids))
