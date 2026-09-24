@@ -9,3 +9,4 @@ scikit-learn
 tqdm
 pyyaml
 jupyter
+pytest

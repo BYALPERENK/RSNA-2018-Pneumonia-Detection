@@ -48,6 +48,7 @@ python scripts/prepare_data.py
 
 - [x] Exploratory data analysis
 - [x] Data preparation: NPY image cache, label tables, patient-level stratified folds
+- [x] Competition metric (unit-tested) and image-free baselines
 - [ ] Classification baseline
 - [ ] Detection model
 - [ ] Evaluation and error analysis
