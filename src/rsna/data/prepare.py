@@ -2,6 +2,7 @@
 import os
 from pathlib import Path
 
+import cv2
 import numpy as np
 import pandas as pd
 import pydicom
@@ -25,6 +26,17 @@ def dicom_to_npy(dcm_path: Path, npy_path: Path) -> dict:
     row["age"] = int(row["age"])
     row["pixel_spacing"] = round(float(row["pixel_spacing"][0]), 3)
     return row
+
+
+def load_resized(npy_path: Path, size: int, clahe: bool = False) -> np.ndarray:
+    """One cached 1024 x 1024 image, downscaled to size x size with area averaging.
+
+    clahe applies CLAHE (clip limit 2, 8 x 8 tiles, as in 01_eda) at full resolution before downscaling.
+    """
+    image = np.load(npy_path)
+    if clahe:
+        image = cv2.createCLAHE(clipLimit=2.0, tileGridSize=(8, 8)).apply(image)
+    return cv2.resize(image, (size, size), interpolation=cv2.INTER_AREA)
 
 
 def build_patients(labels: pd.DataFrame, classes: pd.DataFrame, meta: pd.DataFrame) -> pd.DataFrame:
