@@ -8,6 +8,8 @@ The learning rate is base_lr * sqrt(batch size / 256) and warms up linearly. Aft
 the validation AUC has not improved for --lr-patience epochs (plateau), or follows a cosine to zero (cosine).
 Training stops when the validation AUC has not improved for --early-stop epochs. The epoch with the best
 validation AUC is kept; its validation and test predictions are saved with and without horizontal-flip TTA.
+With --bootstrap (bagging) the model trains on a resample with replacement of the training images, of the same size,
+so the number of steps is unchanged.
 
 The 2 vs 3-class experiment (outputs/classification/fold0_256) used
 --schedule cosine --base-lr 5e-4 --aug light --label-smoothing 0 --drop-path 0 --early-stop 0.
@@ -52,6 +54,7 @@ def parse_args():
     parser.add_argument("--drop-path", type=float, default=0.1)
     parser.add_argument("--clahe", action="store_true", help="read the CLAHE images (npy_{size}_clahe)")
     parser.add_argument("--aug", choices=list(AUGMENTATIONS), default="main")
+    parser.add_argument("--bootstrap", action="store_true", help="train on a bootstrap resample of the training images")
     parser.add_argument("--experiment", default="main_256", help="outputs/classification/<experiment>/<run name>")
     parser.add_argument("--probe", action="store_true", help="run a few steps, print memory use and speed, exit")
     return parser.parse_args()
@@ -99,7 +102,7 @@ def prediction_table(ids, probs, n_classes):
 
 def main():
     args = parse_args()
-    run_name = f"{args.model.split('.')[0]}_{args.n_classes}c_f{args.fold}_s{args.seed}"
+    run_name = f"{args.model.split('.')[0]}_{args.n_classes}c_f{args.fold}_s{args.seed}" + ("_boot" if args.bootstrap else "")
     paths = load_paths()
     out_dir = paths["outputs_dir"] / "classification" / args.experiment / run_name
     torch.manual_seed(args.seed)
@@ -112,6 +115,8 @@ def main():
     classes = torch.tensor(patients["class"].map(CLASSES.index).to_numpy(), device="cuda")
     train_idx = np.flatnonzero(patients["fold"] != args.fold)
     val_idx = np.flatnonzero(patients["fold"] == args.fold)
+    if args.bootstrap:
+        train_idx = np.random.default_rng([args.seed, 1]).choice(train_idx, len(train_idx), replace=True)
     val_images, val_classes = images[val_idx], classes[val_idx]
     val_classes_np = val_classes.cpu().numpy()
 
@@ -171,7 +176,8 @@ def main():
         return
 
     out_dir.mkdir(parents=True, exist_ok=True)
-    config = vars(args) | {"lr": lr, "steps_per_epoch": steps_per_epoch, "n_train": len(train_idx), "n_val": len(val_idx),
+    config = vars(args) | {"lr": lr, "steps_per_epoch": steps_per_epoch, "n_train": len(train_idx),
+                           "n_train_unique": len(np.unique(train_idx)), "n_val": len(val_idx),
                            "augmentation": AUGMENTATIONS[args.aug]}
     (out_dir / "config.json").write_text(json.dumps(config, indent=2))
     print(f"{run_name}: {len(train_idx)} train / {len(val_idx)} val, {steps_per_epoch} steps per epoch, lr {lr:.2e}")
