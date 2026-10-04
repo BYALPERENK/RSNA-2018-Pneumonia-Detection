@@ -5,4 +5,3 @@ processed_data_dir: ../data/processed
 external_data_dir: ../data/external
 models_dir: models
 outputs_dir: outputs
-figures_dir: reports/figures
