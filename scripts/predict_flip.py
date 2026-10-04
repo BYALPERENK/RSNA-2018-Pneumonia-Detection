@@ -10,6 +10,7 @@ flip and scored, with the saved val_preds.csv and the flipped boxes, at the run'
 """
 import argparse
 import json
+from pathlib import Path
 
 import numpy as np
 import pandas as pd
@@ -31,19 +32,21 @@ def parse_args():
 
 
 def load_predictor(run_dir):
-    """A function (uint8 images (N, size, size) on the CPU) -> box table, for the run's saved checkpoint."""
+    """The run's input size, its validation fold and a function (uint8 images (N, size, size) on the CPU) -> box
+    table, for its saved checkpoint."""
     summary = json.loads((run_dir / "summary.json").read_text())
     if "checkpoint" in summary:  # YOLO
         args = dict(line.split(": ", 1) for line in (run_dir / "args.yaml").read_text().splitlines() if ": " in line)
         size, batch = int(args["imgsz"]), int(args["batch"])
+        fold = int(Path(args["data"]).stem.removeprefix("fold"))  # data: .../yolo_256/fold0.yaml
         model = YOLO(str(run_dir / "weights" / f"{summary['checkpoint']}.pt"))
-        return lambda images: train_yolo.predict(model, images, size, batch)
+        return size, fold, lambda images: train_yolo.predict(model, images, size, batch)
     config = json.loads((run_dir / "config.json").read_text())
     model, in_chans = build_detector(config["arch"], config["backbone"], config["size"], pretrained=False)
     model.load_state_dict(torch.load(run_dir / "best.pt"))
     model.cuda()
-    return lambda images: train_detector.predict(model, torch.from_numpy(images).cuda(), config["batch_size"], in_chans,
-                                                 1024 / config["size"])
+    return config["size"], config["fold"], lambda images: train_detector.predict(
+        model, torch.from_numpy(images).cuda(), config["batch_size"], in_chans, 1024 / config["size"])
 
 
 def table(pred, ids, flipped):
@@ -66,14 +69,12 @@ def main():
 
     for run in args.runs:
         run_dir = paths["outputs_dir"] / "detection" / run
-        fold = int(run.rsplit("_f", 1)[1].split("_")[0])
-        size = 384 if "384" in run else 256
+        size, fold, predict = load_predictor(run_dir)
         train = np.load(processed / f"npy_{size}" / "train.npy", mmap_mode="r")
         val_idx = np.flatnonzero(patients["fold"] == fold)
         val_ids = patients["patient_id"].to_numpy()[val_idx]
         val_images = np.ascontiguousarray(train[val_idx])
         test_images = np.load(processed / f"npy_{size}" / "test.npy")
-        predict = load_predictor(run_dir)
 
         threshold = json.loads((run_dir / "summary.json").read_text())["threshold"]
         score = lambda p: score_images(true, p[p["confidence"] >= threshold], val_ids).mean()  # noqa: E731

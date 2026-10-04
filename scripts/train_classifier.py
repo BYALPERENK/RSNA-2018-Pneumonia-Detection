@@ -157,7 +157,7 @@ def main():
         loss.backward()
         optimizer.step()
         step += 1
-        return loss
+        return loss.detach()
 
     if args.probe:
         model.train()

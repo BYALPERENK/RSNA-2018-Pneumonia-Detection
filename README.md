@@ -14,7 +14,7 @@ Private leaderboard (late submissions, scored on ~99% of the 3,000 stage-2 test 
 | 2-Same, box threshold 0.65 | 0.2113 | on the private leaderboard itself (optimistic) |
 | 3-The detector ensemble without post-processing | 0.1593 | – |
 
-For scale: 1st place 0.2548, 10th about 0.225, about 50th 0.192 (344 teams).
+For scale: 1st place 0.2548, 10th about 0.225, about 50th 0.192 (344 teams on the stage-2 leaderboard).
 
 Out-of-fold (5 folds, 26,684 training images):
 
@@ -95,3 +95,7 @@ pytest tests
 ## License
 
 The code is under the [MIT License](LICENSE). The competition data belongs to RSNA and is not included; see the competition's rules on Kaggle.
+
+## Use of AI tools
+
+Large language models (Claude Opus 5.5, GPT-6 Astra, DeepSeek V4.1 Flash, Gemini 3.8 Flash and others) were consulted during this project, and part of the code was written by them. All code and outputs were checked by the author, who takes full responsibility for them.
