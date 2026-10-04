@@ -10,9 +10,9 @@ Private leaderboard (late submissions, scored on ~99% of the 3,000 stage-2 test 
 
 | Submission | Private LB | Chosen |
 |---|---|---|
-| **A**: 3 detectors + classifier gating + box shrink 0.85 × 0.90, box threshold 0.6 | **0.2067** | before any submission, on out-of-fold predictions |
-| Same, box threshold 0.65 | 0.2113 | on the private leaderboard itself (optimistic) |
-| The detector ensemble without post-processing | 0.1593 | – |
+| 1-3 detectors + classifier gating + box shrink 0.85 × 0.90, box threshold 0.6 | **0.2067** | before any submission, on out-of-fold predictions |
+| 2-Same, box threshold 0.65 | 0.2113 | on the private leaderboard itself (optimistic) |
+| 3-The detector ensemble without post-processing | 0.1593 | – |
 
 For scale: 1st place 0.2548, 10th about 0.225, about 50th 0.192 (344 teams).
 
