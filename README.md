@@ -26,6 +26,8 @@ Out-of-fold (5 folds, 26,684 training images):
 
 AUC and F1 are for the image-level decision (pneumonia or not); the score is the competition metric. *With gating the decision combines the box and the classifier score and has no single AUC; 0.934 is the classifier's alone.
 
+The folds split images, not patients: the competition's `patientId` is an image ID, and a patient can have several X-rays. By an outside check with RSNA's mapping to the NIH images (not re-run here), about 70% of the validation images have another X-ray of the same patient in the training folds, about as many as the test images in the training set (73%). The out-of-fold scores therefore match the competition setting, not performance on new patients.
+
 ## The key point: the test set is labelled differently
 
 Most training images were read by one radiologist. The test images were read by three, and overlapping boxes were replaced by their **intersection** ([Shih et al., 2019](https://escholarship.org/content/qt53d65470/qt53d65470.pdf)). Test boxes are therefore smaller (mean area ×0.63) and the test set has more positives. A detector trained and validated on single-reader labels cannot see this; all of the top 4 teams shrank their boxes.
@@ -72,7 +74,7 @@ pip install -e .
 
 PyTorch and torchvision are not listed in `requirements.txt` because the right build depends on your CUDA version. Install them with the command from [pytorch.org](https://pytorch.org/get-started/locally/) (developed with PyTorch 2.14 + CUDA 13.2 on one GPU).
 
-Download the competition data from Kaggle into `../data/raw` (see `configs/paths.yaml`); it is not redistributed here. To mark the 1,000 stage-1 test images inside the training set, put `stage_1_sample_submission.csv` from [pmcheng/rsna-pneumonia](https://github.com/pmcheng/rsna-pneumonia/tree/master/data) into `../data/external/stage1/`.
+Download the competition data from Kaggle into `../data/raw` (see `configs/paths.yaml`); it is not redistributed here. Also put `stage_1_sample_submission.csv` from [pmcheng/rsna-pneumonia](https://github.com/pmcheng/rsna-pneumonia/tree/master/data) into `../data/external/stage1/` (required): it marks the 1,000 stage-1 test images inside the training set.
 
 ## Reproducing
 

@@ -57,7 +57,8 @@ def wbf(preds: list[pd.DataFrame], weights=None, iou_thr: float = 0.3) -> pd.Dat
                     members[j].append(i)
                     k = np.array(members[j])
                     kw = score[k] * w[model[k]]
-                    fused[j] = (kw[:, None] * xyxy[k]).sum(0) / kw.sum()
+                    if kw.sum() > 0:  # boxes with score 0 (e.g. below every rank of 07) keep the first box
+                        fused[j] = (kw[:, None] * xyxy[k]).sum(0) / kw.sum()
                     continue
             fused.append(xyxy[i].copy())
             members.append([i])

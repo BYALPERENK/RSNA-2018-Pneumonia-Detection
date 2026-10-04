@@ -42,10 +42,9 @@ def main():
     boxes = build_boxes(labels)
 
     stage1_file = paths["external_data_dir"] / "stage1" / "stage_1_sample_submission.csv"
-    if stage1_file.exists():
-        patients = add_stage1_test_flag(patients, stage1_file)
-    else:
-        print(f"warning: {stage1_file} not found, is_stage1_test column is not added (see README)")
+    if not stage1_file.exists():  # the training scripts and 06 need is_stage1_test
+        raise FileNotFoundError(f"{stage1_file} not found: it marks the 1,000 stage-1 test images (see README)")
+    patients = add_stage1_test_flag(patients, stage1_file)
 
     patients.to_csv(out_dir / "patients.csv", index=False)
     boxes.to_csv(out_dir / "boxes.csv", index=False)
