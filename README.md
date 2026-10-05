@@ -61,7 +61,7 @@ rsna-pneumonia/
 ├── scripts/          # data preparation, training and prediction entry points
 ├── tests/            # unit tests of the competition metric
 ├── configs/          # paths
-├── models/           # trained weights (not tracked)
+├── models/           # YOLO's COCO weights, downloaded by train_yolo.py (not tracked)
 └── outputs/          # predictions, logs and submissions (not tracked)
 ```
 

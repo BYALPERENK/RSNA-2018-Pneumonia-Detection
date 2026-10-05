@@ -1,7 +1,6 @@
 # --- Data & artifacts (never commit) ---
 /data/
-/models/*
-!/models/.gitkeep
+/models/
 /outputs/*
 !/outputs/.gitkeep
 *.dcm
